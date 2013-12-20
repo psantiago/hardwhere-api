@@ -21,6 +21,8 @@ namespace HardwhereApi.Infrastructure
 
         public DbSet<User> Users { get; set; }
 
+        public DbSet<GoodAsset> GoodAssets { get; set; }
+
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             modelBuilder.Entity<AssetType>()

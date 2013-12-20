@@ -44,9 +44,13 @@
     <Compile Include="Dto\AssetDto.cs" />
     <Compile Include="Dto\AssetPropertyDto.cs" />
     <Compile Include="Dto\AssetTypeDto.cs" />
+    <Compile Include="Dto\GoodAssetDto.cs" />
+    <Compile Include="Dto\TypePropertyDto.cs" />
+    <Compile Include="Dto\UserDto.cs" />
     <Compile Include="Models\Asset.cs" />
     <Compile Include="Models\AssetProperty.cs" />
     <Compile Include="Models\AssetType.cs" />
+    <Compile Include="Models\GoodAsset.cs" />
     <Compile Include="Models\TypeProperty.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
