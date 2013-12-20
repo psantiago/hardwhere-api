@@ -29,6 +29,7 @@ namespace HardwhereApi
             Mapper.CreateMap<Asset, AssetDto>();
             Mapper.CreateMap<AssetType, AssetTypeDto>();
             Mapper.CreateMap<AssetProperty, AssetPropertyDto>();
+            Mapper.CreateMap<GoodAsset, GoodAssetDto>();
             Mapper.CreateMap<User, UserDto>();
         }
     }

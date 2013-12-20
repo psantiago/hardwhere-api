@@ -29,7 +29,7 @@ namespace HardwhereApi.Infrastructure
             };
 
 
-            context.AssetTypes.Add(new AssetType {Name = "Desktop", IconName = "fa-desktop"});
+            context.AssetTypes.Add(new AssetType { Name = "Desktop", IconName = "fa-desktop" });
             context.SaveChanges();
 
             context.AssetTypes.Add(new AssetType { Name = "Laptop", IconName = "fa-laptop" });
@@ -65,7 +65,7 @@ namespace HardwhereApi.Infrastructure
             };
 
             users.ForEach(i => context.Users.Add(i));
-            
+
             typeProperties.ForEach(i => context.TypeProperties.Add(i));
             context.SaveChanges();
 
@@ -73,6 +73,18 @@ namespace HardwhereApi.Infrastructure
             context.SaveChanges();
 
             assetProperties.ForEach(i => context.AssertProperties.Add(i));
+
+            var goodAssets = new List<GoodAsset>
+            {
+                new GoodAsset{ Description = "hello", Name = "first", Location = "2041", SerialNumber = "#13123"},
+                new GoodAsset{ Description = "desc2", Name = "second", Location = "2042", SerialNumber = "#1311323"},
+                new GoodAsset{ Description = "desc4", Name = "third", Location = "2043", SerialNumber = "#131dasd23"},
+                new GoodAsset{ Description = "desc5", Name = "fif", Location = "2044", SerialNumber = "#1555523"},
+            };
+
+            goodAssets.ForEach(i => context.GoodAssets.Add(i));
+            context.SaveChanges();
+
             base.Seed(context);
         }
     }
