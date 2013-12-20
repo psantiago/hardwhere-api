@@ -7,54 +7,49 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using System.Web.Http.Cors;
 using System.Web.Http.Description;
 using HardwhereApi.Core.Models;
 using HardwhereApi.Infrastructure;
 
 namespace HardwhereApi.Controllers
 {
-    [EnableCors("*", "*", "*")]
-    public class AssetController : ApiController
+    public class PropertiesController : ApiController
     {
         private HardwhereApiContext db = new HardwhereApiContext();
 
-        // GET api/Asset
-        public IHttpActionResult GetAssets()
+        // GET api/Properties
+        public IQueryable<TypeProperty> GetTypeProperties()
         {
-            //return "values";
-            //return db.Assets.Include("AssetProperties");
-
-            return Json(db.Assets.ToList());
+            return db.TypeProperties;
         }
 
-        // GET api/Asset/5
-        [ResponseType(typeof(Asset))]
-        public IHttpActionResult GetAsset(int id)
+        // GET api/Properties/5
+        [ResponseType(typeof(TypeProperty))]
+        public IHttpActionResult GetTypeProperty(int id)
         {
-            Asset asset = db.Assets.Find(id);
-            if (asset == null)
+            TypeProperty typeproperty = db.TypeProperties.Find(id);
+            if (typeproperty == null)
             {
                 return NotFound();
             }
 
-            return Ok(asset);
+            return Ok(typeproperty);
         }
 
-        // PUT api/Asset/5
-        public IHttpActionResult PutAsset(int id, Asset asset)
+        // PUT api/Properties/5
+        public IHttpActionResult PutTypeProperty(int id, TypeProperty typeproperty)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != asset.Id)
+            if (id != typeproperty.Id)
             {
                 return BadRequest();
             }
 
-            db.Entry(asset).State = EntityState.Modified;
+            db.Entry(typeproperty).State = EntityState.Modified;
 
             try
             {
@@ -62,7 +57,7 @@ namespace HardwhereApi.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AssetExists(id))
+                if (!TypePropertyExists(id))
                 {
                     return NotFound();
                 }
@@ -75,35 +70,35 @@ namespace HardwhereApi.Controllers
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        // POST api/Asset
-        [ResponseType(typeof(Asset))]
-        public IHttpActionResult PostAsset(Asset asset)
+        // POST api/Properties
+        [ResponseType(typeof(TypeProperty))]
+        public IHttpActionResult PostTypeProperty(TypeProperty typeproperty)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            db.Assets.Add(asset);
+            db.TypeProperties.Add(typeproperty);
             db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = asset.Id }, asset);
+            return CreatedAtRoute("DefaultApi", new { id = typeproperty.Id }, typeproperty);
         }
 
-        // DELETE api/Asset/5
-        [ResponseType(typeof(Asset))]
-        public IHttpActionResult DeleteAsset(int id)
+        // DELETE api/Properties/5
+        [ResponseType(typeof(TypeProperty))]
+        public IHttpActionResult DeleteTypeProperty(int id)
         {
-            Asset asset = db.Assets.Find(id);
-            if (asset == null)
+            TypeProperty typeproperty = db.TypeProperties.Find(id);
+            if (typeproperty == null)
             {
                 return NotFound();
             }
 
-            db.Assets.Remove(asset);
+            db.TypeProperties.Remove(typeproperty);
             db.SaveChanges();
 
-            return Ok(asset);
+            return Ok(typeproperty);
         }
 
         protected override void Dispose(bool disposing)
@@ -115,9 +110,9 @@ namespace HardwhereApi.Controllers
             base.Dispose(disposing);
         }
 
-        private bool AssetExists(int id)
+        private bool TypePropertyExists(int id)
         {
-            return db.Assets.Count(e => e.Id == id) > 0;
+            return db.TypeProperties.Count(e => e.Id == id) > 0;
         }
     }
 }

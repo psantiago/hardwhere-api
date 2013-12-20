@@ -10,7 +10,7 @@ namespace HardwhereApi.Core.Models
         public int AssetId { get; set; }
         [Key]
         [Column(Order = 1)]
-        public int PropertyId { get; set; }
+        public int TypePropertyId { get; set; }
         public string Value { get; set; }
 
 

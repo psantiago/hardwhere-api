@@ -20,5 +20,13 @@ namespace HardwhereApi.Infrastructure
         public DbSet<TypeProperty> TypeProperties { get; set; }
 
         public DbSet<User> Users { get; set; }
+
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            //modelBuilder.Entity<AssetType>()
+            //    .HasMany(a => a.Assets)
+            //    .WithRequired(a => a.AssetType)
+            //    .WillCascadeOnDelete(false);
+        }
     }
 }

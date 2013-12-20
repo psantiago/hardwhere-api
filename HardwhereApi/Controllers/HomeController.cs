@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Web;
+using System.Web.Http.Cors;
 using System.Web.Mvc;
 using HardwhereApi.Core.Models;
 using HardwhereApi.Infrastructure;

@@ -23,13 +23,46 @@ namespace HardwhereApi.Infrastructure
             {
                 new User
                 {
-                    Name = "Admin",
+                    Name = "admin",
                     Password = GenerateHashedPassword("password", "1234") //hashed version of '1234' + salt
                 }
             };
+
+
+            var assetTypes = new List<AssetType> { new AssetType { Name = "desktop" } };
+
+            var typeProperties = new List<TypeProperty>
+            {
+                new TypeProperty {PropertyName = "Name"},
+                new TypeProperty {PropertyName = "Description"},
+                new TypeProperty {PropertyName = "Serial Number"}
+            };
+
+            var assets = new List<Asset>
+            {
+                new Asset { AssetTypeId = 1 }, 
+                new Asset { AssetTypeId = 1 }
+            };
+
+            var assetProperties = new List<AssetProperty>
+            {
+                new AssetProperty {AssetId = 1, TypePropertyId = 1, Value = "Aname"},
+                new AssetProperty {AssetId = 1, TypePropertyId = 2, Value = "Descriptionone"},
+                new AssetProperty {AssetId = 1, TypePropertyId = 3, Value = "8675309"},
+                new AssetProperty {AssetId = 2, TypePropertyId = 1, Value = "second name"},
+                new AssetProperty {AssetId = 2, TypePropertyId = 2, Value = "arnold broke this"},
+                new AssetProperty {AssetId = 2, TypePropertyId = 3, Value = "#123dasd"},
+            };
+
             users.ForEach(i => context.Users.Add(i));
+            assetTypes.ForEach(i => context.AssetTypes.Add(i));
+            typeProperties.ForEach(i => context.TypeProperties.Add(i));
+            context.SaveChanges();
 
+            assets.ForEach(i => context.Assets.Add(i));
+            context.SaveChanges();
 
+            assetProperties.ForEach(i => context.AssertProperties.Add(i));
             base.Seed(context);
         }
     }
