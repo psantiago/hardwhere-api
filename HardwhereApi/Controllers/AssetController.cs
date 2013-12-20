@@ -25,7 +25,8 @@ namespace HardwhereApi.Controllers
         public IEnumerable<AssetDto> GetAssets()
         {
             //return "values";
-            return db.Assets.ToList().Select(Mapper.Map<AssetDto>);
+            var result = db.Assets.Include(f => f.AssetProperties).ToList().Select(Mapper.Map<AssetDto>);
+            return result;
         }
 
         // GET api/Asset/5
