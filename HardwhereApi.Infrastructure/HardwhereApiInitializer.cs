@@ -76,10 +76,10 @@ namespace HardwhereApi.Infrastructure
 
             var goodAssets = new List<GoodAsset>
             {
-                new GoodAsset{ Description = "hello", Name = "first", Location = "2041", SerialNumber = "#13123"},
-                new GoodAsset{ Description = "desc2", Name = "second", Location = "2042", SerialNumber = "#1311323"},
-                new GoodAsset{ Description = "desc4", Name = "third", Location = "2043", SerialNumber = "#131dasd23"},
-                new GoodAsset{ Description = "desc5", Name = "fif", Location = "2044", SerialNumber = "#1555523"},
+                new GoodAsset{Type="Desktop", Description = "hello", Name = "first", Location = "2041", SerialNumber = "#13123"},
+                new GoodAsset{Type="Desktop", Description = "desc2", Name = "second", Location = "2042", SerialNumber = "#1311323"},
+                new GoodAsset{Type="Desktop", Description = "desc4", Name = "third", Location = "2043", SerialNumber = "#131dasd23"},
+                new GoodAsset{Type="Desktop", Description = "desc5", Name = "fif", Location = "2044", SerialNumber = "#1555523"},
             };
 
             goodAssets.ForEach(i => context.GoodAssets.Add(i));
