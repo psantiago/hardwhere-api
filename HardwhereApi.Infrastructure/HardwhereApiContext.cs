@@ -23,10 +23,10 @@ namespace HardwhereApi.Infrastructure
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
-            //modelBuilder.Entity<AssetType>()
-            //    .HasMany(a => a.Assets)
-            //    .WithRequired(a => a.AssetType)
-            //    .WillCascadeOnDelete(false);
+            modelBuilder.Entity<AssetType>()
+                .HasMany(a => a.Assets)
+                .WithRequired(a => a.AssetType)
+                .WillCascadeOnDelete(false);
         }
     }
 }

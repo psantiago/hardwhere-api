@@ -9,6 +9,8 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using System.Web.Http.Description;
+using AutoMapper;
+using HardwhereApi.Core.Dto;
 using HardwhereApi.Core.Models;
 using HardwhereApi.Infrastructure;
 
@@ -20,12 +22,10 @@ namespace HardwhereApi.Controllers
         private HardwhereApiContext db = new HardwhereApiContext();
 
         // GET api/Asset
-        public IHttpActionResult GetAssets()
+        public IEnumerable<AssetDto> GetAssets()
         {
             //return "values";
-            //return db.Assets.Include("AssetProperties");
-
-            return Json(db.Assets.ToList());
+            return db.Assets.ToList().Select(Mapper.Map<AssetDto>);
         }
 
         // GET api/Asset/5

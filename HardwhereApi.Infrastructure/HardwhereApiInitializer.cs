@@ -9,7 +9,7 @@ using HardwhereApi.Core.Models;
 
 namespace HardwhereApi.Infrastructure
 {
-    public class HardwhereApiInitializer : DropCreateDatabaseIfModelChanges<HardwhereApiContext>
+    public class HardwhereApiInitializer : DropCreateDatabaseAlways<HardwhereApiContext>
     {
         private string GenerateHashedPassword(string password, string salt)
         {
