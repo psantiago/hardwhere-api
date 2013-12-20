@@ -42,6 +42,7 @@
   <ItemGroup>
     <Compile Include="Class1.cs" />
     <Compile Include="Dto\AssetDto.cs" />
+    <Compile Include="Dto\AssetPropertyDto.cs" />
     <Compile Include="Dto\AssetTypeDto.cs" />
     <Compile Include="Models\Asset.cs" />
     <Compile Include="Models\AssetProperty.cs" />

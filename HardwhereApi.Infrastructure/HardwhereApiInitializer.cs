@@ -29,13 +29,23 @@ namespace HardwhereApi.Infrastructure
             };
 
 
-            var assetTypes = new List<AssetType> { new AssetType { Name = "desktop" } };
+            context.AssetTypes.Add(new AssetType {Name = "Desktop", IconName = "fa-desktop"});
+            context.SaveChanges();
+
+            context.AssetTypes.Add(new AssetType { Name = "Laptop", IconName = "fa-laptop" });
+            context.SaveChanges();
+
+            context.AssetTypes.Add(new AssetType { Name = "Server", IconName = "fa-upload" });
+            context.SaveChanges();
+
+            context.AssetTypes.Add(new AssetType { Name = "Printer", IconName = "fa-print" });
+            context.SaveChanges();
 
             var typeProperties = new List<TypeProperty>
             {
-                new TypeProperty {PropertyName = "Name"},
-                new TypeProperty {PropertyName = "Description"},
-                new TypeProperty {PropertyName = "Serial Number"}
+                new TypeProperty {AssetTypeId = 1, PropertyName = "Name"},
+                new TypeProperty {AssetTypeId = 1, PropertyName = "Description"},
+                new TypeProperty {AssetTypeId = 1, PropertyName = "Serial Number"}
             };
 
             var assets = new List<Asset>
@@ -55,7 +65,7 @@ namespace HardwhereApi.Infrastructure
             };
 
             users.ForEach(i => context.Users.Add(i));
-            assetTypes.ForEach(i => context.AssetTypes.Add(i));
+            
             typeProperties.ForEach(i => context.TypeProperties.Add(i));
             context.SaveChanges();
 

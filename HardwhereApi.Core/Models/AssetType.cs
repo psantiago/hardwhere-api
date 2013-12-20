@@ -7,6 +7,8 @@ namespace HardwhereApi.Core.Models
         public int Id { get; set; }
         public string Name { get; set; }
 
+        public string IconName { get; set; }
+
         public virtual ICollection<Asset> Assets { get; set; }
         public virtual ICollection<TypeProperty> TypeProperties { get; set; }
     }
