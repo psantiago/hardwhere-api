@@ -12,7 +12,9 @@ using System.Web.Http.Description;
 using AutoMapper;
 using HardwhereApi.Core.Dto;
 using HardwhereApi.Core.Models;
+using HardwhereApi.Core.Utilities;
 using HardwhereApi.Infrastructure;
+using WebGrease.Css.Extensions;
 
 namespace HardwhereApi.Controllers
 {
@@ -22,11 +24,45 @@ namespace HardwhereApi.Controllers
         private HardwhereApiContext db = new HardwhereApiContext();
 
         // GET api/Asset
-        public IEnumerable<AssetDto> GetAssets()
+        public IEnumerable<dynamic> GetAssets()
         {
             //return "values";
-            var result = db.Assets.Include(f => f.AssetProperties).ToList().Select(Mapper.Map<AssetDto>);
-            return result;
+            // var result = db.Assets.ToList().Select(Mapper.Map<AssetDto>);
+            var result = db.Assets.Include(i => i.AssetType).Include(f => f.AssetProperties).ToList().Select(Mapper.Map<AssetDto>);
+            var types = db.TypeProperties.Select(Mapper.Map<TypePropertyDto>).ToList();
+
+            foreach (var asset in result)
+            {
+                foreach (var assetProp in asset.AssetProperties)
+                {
+                    assetProp.TypeProperty = types.FirstOrDefault(i => i.Id == assetProp.TypePropertyId);
+                }
+            }
+
+            var moreAwesomeness = new List<dynamic>();
+
+            
+            foreach (var asset in result)
+            {
+                var dictionary = new Dictionary<string, object>();
+                dictionary["Id"] = asset.Id;
+
+                foreach (var prop in asset.AssetProperties)
+                {
+                    dictionary[prop.TypeProperty.PropertyName] = prop.Value;
+                }
+
+                moreAwesomeness.Add(new SuperDynamic(dictionary));
+            }
+
+            return moreAwesomeness;
+
+           
+
+
+            //result.Select(i => new SuperDynamic(new Dictionary<string, object>()))
+
+            //return result;
         }
 
         // GET api/Asset/5

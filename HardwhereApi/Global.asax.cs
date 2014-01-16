@@ -27,6 +27,7 @@ namespace HardwhereApi
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
             Mapper.CreateMap<Asset, AssetDto>();
+            Mapper.CreateMap<TypeProperty, TypePropertyDto>();
             Mapper.CreateMap<AssetType, AssetTypeDto>();
             Mapper.CreateMap<AssetProperty, AssetPropertyDto>();
             Mapper.CreateMap<GoodAsset, GoodAssetDto>();

@@ -13,8 +13,6 @@ namespace HardwhereApi.Core.Dto
         public int AssetTypeId { get; set; }
         public ICollection<AssetPropertyDto> AssetProperties { get; set; } 
 
-        //public AssetType AssetType { get; set; }
-
-        //public ICollection<AssetProperty> AssetProperties { get; set; }
+        public AssetTypeDto AssetType { get; set; }
     }
 }

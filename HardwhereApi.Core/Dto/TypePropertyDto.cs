@@ -8,6 +8,7 @@ namespace HardwhereApi.Core.Dto
 {
     public class TypePropertyDto
     {
-
+        public int Id { get; set; }
+        public string PropertyName { get; set; }
     }
 }
