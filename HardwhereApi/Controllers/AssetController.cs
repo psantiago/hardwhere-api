@@ -78,7 +78,7 @@ namespace HardwhereApi.Controllers
         }
 
         // GET api/Asset/5
-        [ResponseType(typeof(Asset))]
+        [ResponseType(typeof(DynamicAssetDto))]
         public IHttpActionResult GetAsset(int id)
         {
             var asset = Mapper.Map<AssetDto>(db.Assets.Include(i => i.AssetType).Include(f => f.AssetProperties).FirstOrDefault(i => i.Id == id));
