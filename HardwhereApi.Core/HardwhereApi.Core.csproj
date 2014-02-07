@@ -44,6 +44,7 @@
     <Compile Include="Dto\AssetDto.cs" />
     <Compile Include="Dto\AssetPropertyDto.cs" />
     <Compile Include="Dto\AssetTypeDto.cs" />
+    <Compile Include="Dto\DynamicAssetDto.cs" />
     <Compile Include="Dto\GoodAssetDto.cs" />
     <Compile Include="Dto\TypePropertyDto.cs" />
     <Compile Include="Dto\UserDto.cs" />

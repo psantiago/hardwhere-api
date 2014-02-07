@@ -24,7 +24,7 @@ namespace HardwhereApi.Controllers
         private HardwhereApiContext db = new HardwhereApiContext();
 
         // GET api/Asset
-        public IEnumerable<dynamic> GetAssets()
+        public IEnumerable<DynamicAssetDto> GetAssets()
         {
             //return "values";
             // var result = db.Assets.ToList().Select(Mapper.Map<AssetDto>);
@@ -39,7 +39,7 @@ namespace HardwhereApi.Controllers
                 }
             }
 
-            var moreAwesomeness = new List<dynamic>();
+            var moreAwesomeness = new List<DynamicAssetDto>();
 
             
             foreach (var asset in result)
@@ -52,17 +52,10 @@ namespace HardwhereApi.Controllers
                     dictionary[prop.TypeProperty.PropertyName] = prop.Value;
                 }
 
-                moreAwesomeness.Add(new SuperDynamic(dictionary));
+                moreAwesomeness.Add(new DynamicAssetDto(dictionary));
             }
 
             return moreAwesomeness;
-
-           
-
-
-            //result.Select(i => new SuperDynamic(new Dictionary<string, object>()))
-
-            //return result;
         }
 
         // GET api/Asset/5

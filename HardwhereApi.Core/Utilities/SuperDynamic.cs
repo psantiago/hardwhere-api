@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace HardwhereApi.Core.Utilities
 {
-    public class SuperDynamic : DynamicObject
+    [Serializable]
+    public class SuperDynamic : DynamicObject, ISerializable
     {
         private readonly Dictionary<string, object> _properties;
 
@@ -45,6 +47,14 @@ namespace HardwhereApi.Core.Utilities
             else
             {
                 return false;
+            }
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            foreach (var kvp in _properties)
+            {
+                info.AddValue(kvp.Key, kvp.Value);
             }
         }
     }
