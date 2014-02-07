@@ -6,6 +6,7 @@ using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
 using System.Web.Http.Description;
@@ -110,6 +111,37 @@ namespace HardwhereApi.Controllers
             return Ok(new DynamicAssetDto(dictionary));
         }
 
+        private DynamicAssetDto getDynamicAssetDto(int id)
+        {
+              var asset = Mapper.Map<AssetDto>(db.Assets.Include(i => i.AssetType).Include(f => f.AssetProperties).FirstOrDefault(i => i.Id == id));
+            if (asset == null)
+            {
+                return null;
+            }
+
+            var sections = db.Sections.ToList();
+            var generalSectionIds = sections.Select(i => i.Id).ToList();
+
+            //get the type property DTOs if they weren't passed in.
+            var typePropertyDtos = db.TypeProperties.Select(Mapper.Map<TypePropertyDto>).Where(i => generalSectionIds.Contains(i.SectionId)).ToList();
+
+            foreach (var assetProp in asset.AssetProperties)
+            {
+                assetProp.TypeProperty = typePropertyDtos.FirstOrDefault(i => i.Id == assetProp.TypePropertyId);
+            }
+
+            var dictionary = new Dictionary<string, object>();
+            dictionary["Id"] = asset.Id;
+
+            foreach (var prop in asset.AssetProperties.Where(i => i.TypeProperty != null))
+            {
+                //dictionary[prop.TypeProperty.PropertyName] = prop.Value;
+                dictionary[prop.TypeProperty.PropertyName] = GetPropertyObject(prop.TypeProperty, sections.ToDictionary(i => i.Id, j => j), prop.Value);
+            }
+
+            return new DynamicAssetDto(dictionary);
+        }
+
         private SuperDynamic GetPropertyObject(
             TypePropertyDto typeProperty,
             Dictionary<int, Section> sections,
@@ -163,28 +195,54 @@ namespace HardwhereApi.Controllers
         [ResponseType(typeof(Asset))]
         public IHttpActionResult PostAsset()
         {
-            //generate stuff from the request form
-            var content = Request.Content;
-            string jsonContent = content.ReadAsStringAsync().Result;
-            //Id=6&Name=tacos&Description=tunafish
-            var dictionary = new Dictionary<string, object>();
-            jsonContent.Split('&').ToList().ForEach(i =>
+            try
             {
-                var kvp = i.Split('=');
-                var key = Uri.UnescapeDataString(kvp.First());
-                var value = Uri.UnescapeDataString(kvp.Last());
-                dictionary[key] = value;
-            });
+                //generate stuff from the request form
+                var content = Request.Content;
+                string urlEncodedContent = content.ReadAsStringAsync().Result;
+                //Id=6&Name=tacos&Description=tunafish
+                var dictionary = new Dictionary<string, object>();
+                urlEncodedContent.Split('&').ToList().ForEach(i =>
+                {
+                    var kvp = i.Split('=');
+                    var key = HttpUtility.UrlDecode(kvp.First());
+                    var value = HttpUtility.UrlDecode(kvp.Last());
+                    dictionary[key] = value;
+                });
 
-            if (!ModelState.IsValid)
+                var assetTypeId = int.Parse(dictionary["AssetTypeId"].ToString());
+                var assetType = db.AssetTypes.Include(i => i.TypeProperties).FirstOrDefault(i => i.Id == assetTypeId);
+
+                var asset = new Asset {AssetTypeId = assetTypeId};
+                db.Assets.Add(asset);
+                db.SaveChanges();
+
+                foreach (var typeProperty in assetType.TypeProperties)
+                {
+                    if (dictionary.ContainsKey(typeProperty.PropertyName))
+                    {
+                        db.AssertProperties.Add(new AssetProperty
+                        {
+                            AssetId = asset.Id,
+                            TypePropertyId = typeProperty.Id,
+                            Value = dictionary[typeProperty.PropertyName].ToString()
+                        });
+                    }
+                }
+
+                db.SaveChanges();
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                return CreatedAtRoute("DefaultApi", new { id = asset.Id }, getDynamicAssetDto(asset.Id));
+            }
+            catch (Exception)
             {
                 return BadRequest(ModelState);
             }
-
-            //db.Assets.Add(asset);
-            //db.SaveChanges();
-
-            return CreatedAtRoute("DefaultApi", new { id = 2 }, new Asset());
         }
 
         // DELETE api/Asset/5
