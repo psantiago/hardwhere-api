@@ -11,6 +11,7 @@ using AutoMapper;
 using HardwhereApi.Core.Dto;
 using HardwhereApi.Core.Models;
 using HardwhereApi.Infrastructure;
+using ValueType = HardwhereApi.Core.Models.ValueType;
 
 namespace HardwhereApi
 {
@@ -32,6 +33,8 @@ namespace HardwhereApi
             Mapper.CreateMap<AssetProperty, AssetPropertyDto>();
             Mapper.CreateMap<GoodAsset, GoodAssetDto>();
             Mapper.CreateMap<User, UserDto>();
+            Mapper.CreateMap<Section, SectionDto>();
+            Mapper.CreateMap<ValueType, ValueTypeDto>();
         }
     }
 }

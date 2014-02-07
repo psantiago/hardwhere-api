@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using HardwhereApi.Core.Models;
+using ValueType = HardwhereApi.Core.Models.ValueType;
 
 namespace HardwhereApi.Infrastructure
 {
@@ -43,9 +44,27 @@ namespace HardwhereApi.Infrastructure
 
             var typeProperties = new List<TypeProperty>
             {
-                new TypeProperty {AssetTypeId = 1, PropertyName = "Name"},
-                new TypeProperty {AssetTypeId = 1, PropertyName = "Description"},
-                new TypeProperty {AssetTypeId = 1, PropertyName = "Serial Number"}
+                new TypeProperty {AssetTypeId = 1, PropertyName = "Name", SectionId = 1, ValueTypeId = 1},
+                new TypeProperty {AssetTypeId = 1, PropertyName = "Description", SectionId = 1, ValueTypeId = 1},
+                new TypeProperty {AssetTypeId = 1, PropertyName = "Serial Number", SectionId = 1, ValueTypeId = 1},
+                new TypeProperty {AssetTypeId = 1, PropertyName = "MAC Address", SectionId = 2, ValueTypeId = 1}
+            };
+
+            var sections = new List<Section>
+            {
+                new Section {AssetTypeId = 1, Name = "General", Order = 1, IsGeneral = true},
+                new Section {AssetTypeId = 1, Name = "Networking", Order = 2, IsGeneral = false}
+            };
+
+            var valueTypes = new List<ValueType>
+            {
+                new ValueType {Name="string", Regex=".", ErrorMessage = "must be a string"},
+                new ValueType {Name="bool", Regex="true|false|0|1", ErrorMessage = "must be a boolean"},
+                new ValueType {Name="date", Regex=".", ErrorMessage = "must be a date"},
+                new ValueType {Name="guid", Regex=".", ErrorMessage = "must be a guid"},
+                new ValueType {Name="int", Regex=".", ErrorMessage = "must be a int"},
+                new ValueType {Name="number", Regex=".", ErrorMessage = "must be a number"},
+                new ValueType {Name="blob", Regex=".", ErrorMessage = "must be a blob"},
             };
 
             var assets = new List<Asset>
@@ -59,12 +78,20 @@ namespace HardwhereApi.Infrastructure
                 new AssetProperty {AssetId = 1, TypePropertyId = 1, Value = "Aname"},
                 new AssetProperty {AssetId = 1, TypePropertyId = 2, Value = "Descriptionone"},
                 new AssetProperty {AssetId = 1, TypePropertyId = 3, Value = "8675309"},
+                new AssetProperty {AssetId = 1, TypePropertyId = 4, Value = "555:111:222"},
                 new AssetProperty {AssetId = 2, TypePropertyId = 1, Value = "second name"},
                 new AssetProperty {AssetId = 2, TypePropertyId = 2, Value = "arnold broke this"},
                 new AssetProperty {AssetId = 2, TypePropertyId = 3, Value = "#123dasd"},
+                new AssetProperty {AssetId = 2, TypePropertyId = 4, Value = "555:123:6645"},
             };
 
             users.ForEach(i => context.Users.Add(i));
+
+            sections.ForEach(i => context.Sections.Add(i));
+            context.SaveChanges();
+
+            valueTypes.ForEach(i => context.ValueTypes.Add(i));
+            context.SaveChanges();
 
             typeProperties.ForEach(i => context.TypeProperties.Add(i));
             context.SaveChanges();

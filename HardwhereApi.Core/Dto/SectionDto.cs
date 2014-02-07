@@ -6,14 +6,12 @@ using System.Threading.Tasks;
 
 namespace HardwhereApi.Core.Dto
 {
-    public class TypePropertyDto
+    public class SectionDto
     {
         public int Id { get; set; }
-        public string PropertyName { get; set; }
+        public int AssetTypeId { get; set; }
+        public string Name { get; set; }
         public int Order { get; set; }
-
-        public int SectionId { get; set; }
-
-        public int ValueTypeId { get; set; }
+        public bool IsGeneral { get; set; }
     }
 }

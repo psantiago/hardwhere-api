@@ -32,8 +32,10 @@ namespace HardwhereApi.Controllers
             //get the type properties and map to their dto
             var types = db.TypeProperties.Select(Mapper.Map<TypePropertyDto>).ToList();
 
+            var sections = db.Sections.Select(Mapper.Map<SectionDto>).ToList();
+
             var moreAwesomeness = new List<DynamicAssetDto>();
-            result.ForEach(i => moreAwesomeness.Add(CreateDynamicAssetDto(i, types)));
+            result.ForEach(i => moreAwesomeness.Add(CreateDynamicAssetDto(i, true, types, sections)));
 
             return moreAwesomeness;
         }
@@ -49,10 +51,15 @@ namespace HardwhereApi.Controllers
         /// <returns></returns>
         private DynamicAssetDto CreateDynamicAssetDto(
             AssetDto assetWithAssetTypeAndAssetProperty, 
-            List<TypePropertyDto> typePropertyDtos = null)
+            bool generalOnly = true,
+            List<TypePropertyDto> typePropertyDtos = null,
+            List<SectionDto> sectionDtos = null)
         {
+            sectionDtos = sectionDtos ?? db.Sections.Select(Mapper.Map<SectionDto>).ToList();
+            var generalSectionIds = generalOnly ? sectionDtos.Where(i => i.IsGeneral).Select(i => i.Id).ToList() : sectionDtos.Select(i => i.Id).ToList();
+
             //get the type property DTOs if they weren't passed in.
-            typePropertyDtos = typePropertyDtos ?? db.TypeProperties.Select(Mapper.Map<TypePropertyDto>).ToList();
+            typePropertyDtos = (typePropertyDtos ?? db.TypeProperties.Select(Mapper.Map<TypePropertyDto>)).Where(i => generalSectionIds.Contains(i.SectionId)).ToList();
 
             foreach (var assetProp in assetWithAssetTypeAndAssetProperty.AssetProperties)
             {
@@ -62,7 +69,7 @@ namespace HardwhereApi.Controllers
             var dictionary = new Dictionary<string, object>();
             dictionary["Id"] = assetWithAssetTypeAndAssetProperty.Id;
 
-            foreach (var prop in assetWithAssetTypeAndAssetProperty.AssetProperties)
+            foreach (var prop in assetWithAssetTypeAndAssetProperty.AssetProperties.Where(i => i.TypeProperty != null))
             {
                 dictionary[prop.TypeProperty.PropertyName] = prop.Value;
             }
@@ -80,7 +87,7 @@ namespace HardwhereApi.Controllers
                 return NotFound();
             }
 
-            return Ok(CreateDynamicAssetDto(asset));
+            return Ok(CreateDynamicAssetDto(asset, false));
         }
 
         // PUT api/Asset/5

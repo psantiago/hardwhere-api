@@ -19,6 +19,10 @@ namespace HardwhereApi.Infrastructure
         public DbSet<AssetType> AssetTypes { get; set; }
         public DbSet<TypeProperty> TypeProperties { get; set; }
 
+        public DbSet<Section> Sections { get; set; }
+
+        public DbSet<Core.Models.ValueType> ValueTypes { get; set; }
+
         public DbSet<User> Users { get; set; }
 
         public DbSet<GoodAsset> GoodAssets { get; set; }
@@ -29,6 +33,10 @@ namespace HardwhereApi.Infrastructure
                 .HasMany(a => a.Assets)
                 .WithRequired(a => a.AssetType)
                 .WillCascadeOnDelete(false);
+            modelBuilder.Entity<AssetType>()
+              .HasMany(a => a.TypeProperties)
+              .WithRequired(a => a.AssetType)
+              .WillCascadeOnDelete(false);
         }
     }
 }
