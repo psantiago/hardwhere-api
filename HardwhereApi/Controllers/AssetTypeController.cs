@@ -28,22 +28,16 @@ namespace HardwhereApi.Controllers
         }
 
         // GET api/AssetType/5
-        [ResponseType(typeof(DynamicAssetDto))]
+        [ResponseType(typeof(AssetType))]
         public IHttpActionResult GetAssetType(int id)
         {
-            var assetType = db.AssetTypes.Include(i => i.TypeProperties).FirstOrDefault(i => i.Id == id);
-            if (assetType == null) return NotFound();
-
-            var dictionary = new Dictionary<string, object>();
-            dictionary["Id"] = 0;
-            dictionary["AssetTypeId"] = id;
-
-            foreach (var prop in assetType.TypeProperties)
+            AssetType assettype = db.AssetTypes.Find(id);
+            if (assettype == null)
             {
-                dictionary[prop.PropertyName] = null;
+                return NotFound();
             }
 
-            return Ok(new DynamicAssetDto(dictionary));
+            return Ok(assettype);
         }
 
         // PUT api/AssetType/5
