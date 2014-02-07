@@ -50,7 +50,7 @@ namespace HardwhereApi.Controllers
         /// <param name="typePropertyDtos"></param>
         /// <returns></returns>
         private DynamicAssetDto CreateDynamicAssetDto(
-            AssetDto assetWithAssetTypeAndAssetProperty, 
+            AssetDto assetWithAssetTypeAndAssetProperty,
             bool generalOnly = true,
             List<TypePropertyDto> typePropertyDtos = null,
             List<SectionDto> sectionDtos = null)
@@ -87,7 +87,42 @@ namespace HardwhereApi.Controllers
                 return NotFound();
             }
 
-            return Ok(CreateDynamicAssetDto(asset, false));
+            var sections = db.Sections.ToList();
+            var generalSectionIds = sections.Select(i => i.Id).ToList();
+
+            //get the type property DTOs if they weren't passed in.
+            var typePropertyDtos = db.TypeProperties.Select(Mapper.Map<TypePropertyDto>).Where(i => generalSectionIds.Contains(i.SectionId)).ToList();
+
+            foreach (var assetProp in asset.AssetProperties)
+            {
+                assetProp.TypeProperty = typePropertyDtos.FirstOrDefault(i => i.Id == assetProp.TypePropertyId);
+            }
+
+            var dictionary = new Dictionary<string, object>();
+            dictionary["Id"] = asset.Id;
+
+            foreach (var prop in asset.AssetProperties.Where(i => i.TypeProperty != null))
+            {
+                //dictionary[prop.TypeProperty.PropertyName] = prop.Value;
+                dictionary[prop.TypeProperty.PropertyName] = GetPropertyObject(prop.TypeProperty, sections.ToDictionary(i => i.Id, j => j), prop.Value);
+            }
+
+            return Ok(new DynamicAssetDto(dictionary));
+        }
+
+        private SuperDynamic GetPropertyObject(
+            TypePropertyDto typeProperty,
+            Dictionary<int, Section> sections,
+            object currentAssetPropertyValue = null)
+        {
+            var currentValueType = sections[typeProperty.SectionId];
+            var dictionary = new Dictionary<string, object>();
+            dictionary["Value"] = currentAssetPropertyValue;
+            dictionary["SectionName"] = currentValueType.Name;
+            dictionary["SectionOrder"] = currentValueType.Order;
+            dictionary["PropertyOrder"] = typeProperty.Order;
+
+            return new SuperDynamic(dictionary);
         }
 
         // PUT api/Asset/5

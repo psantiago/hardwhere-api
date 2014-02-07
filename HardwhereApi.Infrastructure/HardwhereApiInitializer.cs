@@ -44,10 +44,10 @@ namespace HardwhereApi.Infrastructure
 
             var typeProperties = new List<TypeProperty>
             {
-                new TypeProperty {AssetTypeId = 1, PropertyName = "Name", SectionId = 1, ValueTypeId = 1},
-                new TypeProperty {AssetTypeId = 1, PropertyName = "Description", SectionId = 1, ValueTypeId = 1},
-                new TypeProperty {AssetTypeId = 1, PropertyName = "Serial Number", SectionId = 1, ValueTypeId = 1},
-                new TypeProperty {AssetTypeId = 1, PropertyName = "MAC Address", SectionId = 2, ValueTypeId = 1}
+                new TypeProperty {AssetTypeId = 1, PropertyName = "Name", SectionId = 1, ValueTypeId = 1, Order = 1},
+                new TypeProperty {AssetTypeId = 1, PropertyName = "Description", SectionId = 1, ValueTypeId = 1, Order = 2},
+                new TypeProperty {AssetTypeId = 1, PropertyName = "Serial Number", SectionId = 1, ValueTypeId = 1, Order = 3},
+                new TypeProperty {AssetTypeId = 1, PropertyName = "MAC Address", SectionId = 2, ValueTypeId = 1, Order = 4}
             };
 
             var sections = new List<Section>
