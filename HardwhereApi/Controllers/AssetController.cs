@@ -113,7 +113,7 @@ namespace HardwhereApi.Controllers
 
         private DynamicAssetDto getDynamicAssetDto(int id)
         {
-              var asset = Mapper.Map<AssetDto>(db.Assets.Include(i => i.AssetType).Include(f => f.AssetProperties).FirstOrDefault(i => i.Id == id));
+            var asset = Mapper.Map<AssetDto>(db.Assets.Include(i => i.AssetType).Include(f => f.AssetProperties).FirstOrDefault(i => i.Id == id));
             if (asset == null)
             {
                 return null;
@@ -158,37 +158,91 @@ namespace HardwhereApi.Controllers
         }
 
         // PUT api/Asset/5
-        public IHttpActionResult PutAsset(int id, Asset asset)
+        public IHttpActionResult PutAsset(Asset asset)
         {
-            if (!ModelState.IsValid)
+            try
+            {
+                var dictionary = ProcessRequest(Request);
+
+                var assetTypeId = int.Parse(dictionary["AssetTypeId"].ToString());
+                var typeProperties = db.TypeProperties.Where(i => i.AssetTypeId == assetTypeId);
+
+                db.AssertProperties.RemoveRange(db.AssertProperties.Where(i => i.AssetId == asset.Id));
+
+                foreach (var typeProperty in typeProperties)
+                {
+                    if (dictionary.ContainsKey(typeProperty.PropertyName))
+                    {
+                        db.AssertProperties.Add(new AssetProperty
+                        {
+                            AssetId = asset.Id,
+                            TypePropertyId = typeProperty.Id,
+                            Value = dictionary[typeProperty.PropertyName].ToString()
+                        });
+                    }
+                }
+
+                db.SaveChanges();
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                return StatusCode(HttpStatusCode.NoContent);
+            }
+            catch (Exception)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != asset.Id)
-            {
-                return BadRequest();
-            }
+            //if (!ModelState.IsValid)
+            //{
+            //    return BadRequest(ModelState);
+            //}
 
-            db.Entry(asset).State = EntityState.Modified;
+            //if (id != asset.Id)
+            //{
+            //    return BadRequest();
+            //}
 
-            try
-            {
-                db.SaveChanges();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!AssetExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            //db.Entry(asset).State = EntityState.Modified;
 
-            return StatusCode(HttpStatusCode.NoContent);
+            //try
+            //{
+            //    db.SaveChanges();
+            //}
+            //catch (DbUpdateConcurrencyException)
+            //{
+            //    if (!AssetExists(id))
+            //    {
+            //        return NotFound();
+            //    }
+            //    else
+            //    {
+            //        throw;
+            //    }
+            //}
+
+            //return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        private Dictionary<string, object> ProcessRequest(HttpRequestMessage request)
+        {
+            //generate stuff from the request form
+            var content = request.Content;
+            string urlEncodedContent = content.ReadAsStringAsync().Result;
+            //Id=6&Name=tacos&Description=tunafish
+            var dictionary = new Dictionary<string, object>();
+            urlEncodedContent.Split('&').ToList().ForEach(i =>
+            {
+                var kvp = i.Split('=');
+                var key = HttpUtility.UrlDecode(kvp.First());
+                var value = HttpUtility.UrlDecode(kvp.Last());
+                dictionary[key] = value;
+            });
+
+            return dictionary;
         }
 
         // POST api/Asset
@@ -197,23 +251,12 @@ namespace HardwhereApi.Controllers
         {
             try
             {
-                //generate stuff from the request form
-                var content = Request.Content;
-                string urlEncodedContent = content.ReadAsStringAsync().Result;
-                //Id=6&Name=tacos&Description=tunafish
-                var dictionary = new Dictionary<string, object>();
-                urlEncodedContent.Split('&').ToList().ForEach(i =>
-                {
-                    var kvp = i.Split('=');
-                    var key = HttpUtility.UrlDecode(kvp.First());
-                    var value = HttpUtility.UrlDecode(kvp.Last());
-                    dictionary[key] = value;
-                });
+                var dictionary = ProcessRequest(Request);
 
                 var assetTypeId = int.Parse(dictionary["AssetTypeId"].ToString());
                 var assetType = db.AssetTypes.Include(i => i.TypeProperties).FirstOrDefault(i => i.Id == assetTypeId);
 
-                var asset = new Asset {AssetTypeId = assetTypeId};
+                var asset = new Asset { AssetTypeId = assetTypeId };
                 db.Assets.Add(asset);
                 db.SaveChanges();
 
@@ -237,7 +280,7 @@ namespace HardwhereApi.Controllers
                     return BadRequest(ModelState);
                 }
 
-                return CreatedAtRoute("DefaultApi", new { id = asset.Id }, getDynamicAssetDto(asset.Id));
+                return Ok(true);
             }
             catch (Exception)
             {
