@@ -32,32 +32,42 @@ namespace HardwhereApi.Controllers
             //get the type properties and map to their dto
             var types = db.TypeProperties.Select(Mapper.Map<TypePropertyDto>).ToList();
 
-            //map the type property to the asset property for each asset
-            foreach (var asset in result)
-            {
-                foreach (var assetProp in asset.AssetProperties)
-                {
-                    assetProp.TypeProperty = types.FirstOrDefault(i => i.Id == assetProp.TypePropertyId);
-                }
-            }
-
-            //create a super-duper dynamic object, so the json/xml/etc. returned is more like {id: 1, name:'hello'}
-            //instead of something like {id:1, properties:[{propertyname='name', value: 'hello'}
             var moreAwesomeness = new List<DynamicAssetDto>();
-            foreach (var asset in result)
-            {
-                var dictionary = new Dictionary<string, object>();
-                dictionary["Id"] = asset.Id;
-
-                foreach (var prop in asset.AssetProperties)
-                {
-                    dictionary[prop.TypeProperty.PropertyName] = prop.Value;
-                }
-
-                moreAwesomeness.Add(new DynamicAssetDto(dictionary));
-            }
+            result.ForEach(i => moreAwesomeness.Add(CreateDynamicAssetDto(i, types)));
 
             return moreAwesomeness;
+        }
+
+        /// <summary>
+        /// Give an assetdto which includes it's assettype and asset properties,
+        /// generate the DynamicAssetDto to easier client-side consumption.
+        /// If using this multiple times in one call, it's HIGHLY recommended to pass in the typePropertyDtos 
+        /// (so we don't have to retrieve these every time the function is called).
+        /// </summary>
+        /// <param name="assetWithAssetTypeAndAssetProperty"></param>
+        /// <param name="typePropertyDtos"></param>
+        /// <returns></returns>
+        private DynamicAssetDto CreateDynamicAssetDto(
+            AssetDto assetWithAssetTypeAndAssetProperty, 
+            List<TypePropertyDto> typePropertyDtos = null)
+        {
+            //get the type property DTOs if they weren't passed in.
+            typePropertyDtos = typePropertyDtos ?? db.TypeProperties.Select(Mapper.Map<TypePropertyDto>).ToList();
+
+            foreach (var assetProp in assetWithAssetTypeAndAssetProperty.AssetProperties)
+            {
+                assetProp.TypeProperty = typePropertyDtos.FirstOrDefault(i => i.Id == assetProp.TypePropertyId);
+            }
+
+            var dictionary = new Dictionary<string, object>();
+            dictionary["Id"] = assetWithAssetTypeAndAssetProperty.Id;
+
+            foreach (var prop in assetWithAssetTypeAndAssetProperty.AssetProperties)
+            {
+                dictionary[prop.TypeProperty.PropertyName] = prop.Value;
+            }
+
+            return new DynamicAssetDto(dictionary);
         }
 
         // GET api/Asset/5
