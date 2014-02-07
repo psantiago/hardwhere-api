@@ -26,11 +26,13 @@ namespace HardwhereApi.Controllers
         // GET api/Asset
         public IEnumerable<DynamicAssetDto> GetAssets()
         {
-            //return "values";
-            // var result = db.Assets.ToList().Select(Mapper.Map<AssetDto>);
+            //get assets with their types and properties, and map to the asset dto
             var result = db.Assets.Include(i => i.AssetType).Include(f => f.AssetProperties).ToList().Select(Mapper.Map<AssetDto>);
+
+            //get the type properties and map to their dto
             var types = db.TypeProperties.Select(Mapper.Map<TypePropertyDto>).ToList();
 
+            //map the type property to the asset property for each asset
             foreach (var asset in result)
             {
                 foreach (var assetProp in asset.AssetProperties)
@@ -39,9 +41,9 @@ namespace HardwhereApi.Controllers
                 }
             }
 
+            //create a super-duper dynamic object, so the json/xml/etc. returned is more like {id: 1, name:'hello'}
+            //instead of something like {id:1, properties:[{propertyname='name', value: 'hello'}
             var moreAwesomeness = new List<DynamicAssetDto>();
-
-            
             foreach (var asset in result)
             {
                 var dictionary = new Dictionary<string, object>();
