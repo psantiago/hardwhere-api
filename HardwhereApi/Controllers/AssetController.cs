@@ -74,13 +74,13 @@ namespace HardwhereApi.Controllers
         [ResponseType(typeof(Asset))]
         public IHttpActionResult GetAsset(int id)
         {
-            Asset asset = db.Assets.Find(id);
+            var asset = Mapper.Map<AssetDto>(db.Assets.Include(i => i.AssetType).Include(f => f.AssetProperties).FirstOrDefault(i => i.Id == id));
             if (asset == null)
             {
                 return NotFound();
             }
 
-            return Ok(asset);
+            return Ok(CreateDynamicAssetDto(asset));
         }
 
         // PUT api/Asset/5
