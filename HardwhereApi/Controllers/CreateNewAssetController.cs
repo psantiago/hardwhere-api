@@ -26,13 +26,15 @@ namespace HardwhereApi.Controllers
 
             var valueTypes = db.ValueTypes.Select(Mapper.Map<ValueTypeDto>).ToDictionary(i => i.Id, j => j);
 
+            var sections = db.Sections.Select(Mapper.Map<SectionDto>).ToDictionary(i => i.Id, j => j);
+
             var dictionary = new Dictionary<string, object>();
             dictionary["Id"] = 0;
             dictionary["AssetTypeId"] = id;
 
             foreach (var prop in assetType.TypeProperties)
             {
-                dictionary[prop.PropertyName] = GetPropertyObject(prop, valueTypes);
+                dictionary[prop.PropertyName] = GetPropertyObject(prop, valueTypes, sections);
             }
 
             return Ok(new DynamicAssetDto(dictionary));
@@ -41,14 +43,19 @@ namespace HardwhereApi.Controllers
         private SuperDynamic GetPropertyObject(
             TypeProperty typeProperty,
             Dictionary<int, ValueTypeDto> valueTypes,
+            Dictionary<int, SectionDto> sections,
             object currentAssetPropertyValue = null)
         {
             var currentValueType = valueTypes[typeProperty.ValueTypeId];
+            var currentSection = sections[typeProperty.SectionId];
             var dictionary = new Dictionary<string, object>();
             dictionary["Value"] = currentAssetPropertyValue;
             dictionary["Type"] = currentValueType.Name;
             dictionary["Regex"] = currentValueType.Regex;
             dictionary["ErrorMessage"] = currentValueType.ErrorMessage;
+            dictionary["PropertyOrder"] = typeProperty.Order;
+            dictionary["SectionName"] = currentSection.Name;
+            dictionary["SectionOrder"] = currentSection.Order;
 
             return new SuperDynamic(dictionary);
         }
