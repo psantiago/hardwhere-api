@@ -119,17 +119,30 @@ namespace HardwhereApi.Controllers
 
         // POST api/Asset
         [ResponseType(typeof(Asset))]
-        public IHttpActionResult PostAsset(Asset asset)
+        public IHttpActionResult PostAsset()
         {
+            //generate stuff from the request form
+            var content = Request.Content;
+            string jsonContent = content.ReadAsStringAsync().Result;
+            //Id=6&Name=tacos&Description=tunafish
+            var dictionary = new Dictionary<string, object>();
+            jsonContent.Split('&').ToList().ForEach(i =>
+            {
+                var kvp = i.Split('=');
+                var key = Uri.UnescapeDataString(kvp.First());
+                var value = Uri.UnescapeDataString(kvp.Last());
+                dictionary[key] = value;
+            });
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            db.Assets.Add(asset);
-            db.SaveChanges();
+            //db.Assets.Add(asset);
+            //db.SaveChanges();
 
-            return CreatedAtRoute("DefaultApi", new { id = asset.Id }, asset);
+            return CreatedAtRoute("DefaultApi", new { id = 2 }, new Asset());
         }
 
         // DELETE api/Asset/5
