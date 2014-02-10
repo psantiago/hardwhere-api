@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Data;
 using System.Data.Entity;
 using System.Data.Entity.Infrastructure;
@@ -111,37 +112,6 @@ namespace HardwhereApi.Controllers
             return Ok(new DynamicAssetDto(dictionary));
         }
 
-        private DynamicAssetDto getDynamicAssetDto(int id)
-        {
-            var asset = Mapper.Map<AssetDto>(db.Assets.Include(i => i.AssetType).Include(f => f.AssetProperties).FirstOrDefault(i => i.Id == id));
-            if (asset == null)
-            {
-                return null;
-            }
-
-            var sections = db.Sections.ToList();
-            var generalSectionIds = sections.Select(i => i.Id).ToList();
-
-            //get the type property DTOs if they weren't passed in.
-            var typePropertyDtos = db.TypeProperties.Select(Mapper.Map<TypePropertyDto>).Where(i => generalSectionIds.Contains(i.SectionId)).ToList();
-
-            foreach (var assetProp in asset.AssetProperties)
-            {
-                assetProp.TypeProperty = typePropertyDtos.FirstOrDefault(i => i.Id == assetProp.TypePropertyId);
-            }
-
-            var dictionary = new Dictionary<string, object>();
-            dictionary["Id"] = asset.Id;
-
-            foreach (var prop in asset.AssetProperties.Where(i => i.TypeProperty != null))
-            {
-                //dictionary[prop.TypeProperty.PropertyName] = prop.Value;
-                dictionary[prop.TypeProperty.PropertyName] = GetPropertyObject(prop.TypeProperty, sections.ToDictionary(i => i.Id, j => j), prop.Value);
-            }
-
-            return new DynamicAssetDto(dictionary);
-        }
-
         private SuperDynamic GetPropertyObject(
             TypePropertyDto typeProperty,
             Dictionary<int, Section> sections,
@@ -155,76 +125,6 @@ namespace HardwhereApi.Controllers
             dictionary["PropertyOrder"] = typeProperty.Order;
 
             return new SuperDynamic(dictionary);
-        }
-
-        // PUT api/Asset/5
-        public IHttpActionResult PutAsset(Asset asset)
-        {
-            try
-            {
-                var dictionary = ProcessRequest(Request);
-
-                var assetTypeId = int.Parse(dictionary["AssetTypeId"].ToString());
-                var typeProperties = db.TypeProperties.Where(i => i.AssetTypeId == assetTypeId);
-
-                db.AssertProperties.RemoveRange(db.AssertProperties.Where(i => i.AssetId == asset.Id));
-
-                foreach (var typeProperty in typeProperties)
-                {
-                    if (dictionary.ContainsKey(typeProperty.PropertyName))
-                    {
-                        db.AssertProperties.Add(new AssetProperty
-                        {
-                            AssetId = asset.Id,
-                            TypePropertyId = typeProperty.Id,
-                            Value = dictionary[typeProperty.PropertyName].ToString()
-                        });
-                    }
-                }
-
-                db.SaveChanges();
-
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-                return StatusCode(HttpStatusCode.NoContent);
-            }
-            catch (Exception)
-            {
-                return BadRequest(ModelState);
-            }
-
-            //if (!ModelState.IsValid)
-            //{
-            //    return BadRequest(ModelState);
-            //}
-
-            //if (id != asset.Id)
-            //{
-            //    return BadRequest();
-            //}
-
-            //db.Entry(asset).State = EntityState.Modified;
-
-            //try
-            //{
-            //    db.SaveChanges();
-            //}
-            //catch (DbUpdateConcurrencyException)
-            //{
-            //    if (!AssetExists(id))
-            //    {
-            //        return NotFound();
-            //    }
-            //    else
-            //    {
-            //        throw;
-            //    }
-            //}
-
-            //return StatusCode(HttpStatusCode.NoContent);
         }
 
         private Dictionary<string, object> ProcessRequest(HttpRequestMessage request)
@@ -245,7 +145,12 @@ namespace HardwhereApi.Controllers
             return dictionary;
         }
 
-        // POST api/Asset
+        /// <summary>
+        /// This may be used for both inserts or updates. If an id field is passed and it is not null, an update will be attempted.
+        /// Otherwise, an insert will be attempted.
+        /// Must use Content-Type: application/x-www-form-urlencoded.
+        /// </summary>
+        /// <returns></returns>
         [ResponseType(typeof(Asset))]
         public IHttpActionResult PostAsset()
         {
@@ -254,22 +159,44 @@ namespace HardwhereApi.Controllers
                 var dictionary = ProcessRequest(Request);
 
                 var assetTypeId = int.Parse(dictionary["AssetTypeId"].ToString());
+                var typeProperties = db.TypeProperties.Where(i => i.AssetTypeId == assetTypeId);
                 var assetType = db.AssetTypes.Include(i => i.TypeProperties).FirstOrDefault(i => i.Id == assetTypeId);
 
-                var asset = new Asset { AssetTypeId = assetTypeId };
-                db.Assets.Add(asset);
-                db.SaveChanges();
-
-                foreach (var typeProperty in assetType.TypeProperties)
+                if (dictionary.ContainsKey("Id") && dictionary["Id"].ToString() != "0" && !String.IsNullOrWhiteSpace(dictionary["Id"].ToString()))
                 {
-                    if (dictionary.ContainsKey(typeProperty.PropertyName))
+                    var assetId = int.Parse(dictionary["Id"].ToString());
+                    db.AssertProperties.RemoveRange(db.AssertProperties.Where(i => i.AssetId == assetId));
+
+                    foreach (var typeProperty in typeProperties)
                     {
-                        db.AssertProperties.Add(new AssetProperty
+                        if (dictionary.ContainsKey(typeProperty.PropertyName))
                         {
-                            AssetId = asset.Id,
-                            TypePropertyId = typeProperty.Id,
-                            Value = dictionary[typeProperty.PropertyName].ToString()
-                        });
+                            db.AssertProperties.Add(new AssetProperty
+                            {
+                                AssetId = assetId,
+                                TypePropertyId = typeProperty.Id,
+                                Value = dictionary[typeProperty.PropertyName].ToString()
+                            });
+                        }
+                    }
+                }
+                else
+                {
+                    var asset = new Asset { AssetTypeId = assetTypeId };
+                    db.Assets.Add(asset);
+                    db.SaveChanges();
+
+                    foreach (var typeProperty in assetType.TypeProperties)
+                    {
+                        if (dictionary.ContainsKey(typeProperty.PropertyName))
+                        {
+                            db.AssertProperties.Add(new AssetProperty
+                            {
+                                AssetId = asset.Id,
+                                TypePropertyId = typeProperty.Id,
+                                Value = dictionary[typeProperty.PropertyName].ToString()
+                            });
+                        }
                     }
                 }
 
@@ -311,11 +238,6 @@ namespace HardwhereApi.Controllers
                 db.Dispose();
             }
             base.Dispose(disposing);
-        }
-
-        private bool AssetExists(int id)
-        {
-            return db.Assets.Count(e => e.Id == id) > 0;
         }
     }
 }
